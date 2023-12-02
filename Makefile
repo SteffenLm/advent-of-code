@@ -1,3 +1,5 @@
+# Download puzzles before 2023
+# DAY?=$(shell date +%d)
 DAY?=$(shell date +%-d)
 DAY_WITH_PADDING=$(shell printf "%02d" ${DAY})
 YEAR?=$(shell date +%Y)
