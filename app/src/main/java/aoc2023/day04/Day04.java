@@ -1,7 +1,8 @@
 package aoc2023.day04;
 
 import java.util.List;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -24,7 +25,7 @@ public class Day04 {
 
     }
 
-    public record Card(String cardId, String[] allNumbers) {
+    public record Card(String id, String[] allNumbers) {
         public CardNumber getWinningNumbers() {
             var winningNumbers = allNumbers[0].trim().split(" ");
             return new CardNumber(winningNumbers);
@@ -34,21 +35,33 @@ public class Day04 {
             var drawnNumbers = allNumbers[1].trim().split(" ");
             return new CardNumber(drawnNumbers);
         }
+
+        public int idAsInt() {
+            return Integer.valueOf(id());
+        }
+
+        public int matches() {
+            return (int) getWinningNumbers().asStream()
+                    .filter(winningNumber -> !winningNumber.equals(""))
+                    .filter(winningNumber -> getDrawnNumbers().asStream()
+                            .anyMatch(drawnNumber -> drawnNumber.equals(winningNumber)))
+                    .count();
+        }
     }
 
     public record Line(String line) {
         public Card getCard() {
-            var cardNumbers = line.split(":");
-            var allNumbers = cardNumbers[1].split("\\|");
-            var cardId = cardNumbers[0].split(" ")[1];
-            return new Card(cardId, allNumbers);
+            var cardLine = line.split(":");
+            var id = cardLine[0].split("\\s+")[1];
+            var numbers = cardLine[1].split("\\|");
+            return new Card(id, numbers);
         }
     }
 
     public static int part1(List<String> input) {
         return input.stream()
                 .map(line -> new Line(line).getCard())
-                .map(card -> getNumberOfMatches(card))
+                .map(card -> card.matches())
                 .map(numberOfMatches -> {
                     if (numberOfMatches > 0) {
                         return Math.pow(2, numberOfMatches - 1);
@@ -60,15 +73,19 @@ public class Day04 {
     }
 
     public static int part2(List<String> input) {
-        return 0;
-    }
+        List<Card> cards = input.stream()
+                .map(line -> new Line(line).getCard())
+                .toList();
+        Map<Integer, Integer> map = cards.stream()
+                .collect(Collectors.toMap(card -> card.idAsInt(), card -> 1));
 
-    private static int getNumberOfMatches(Card card) {
-        return (int) card.getWinningNumbers().asStream()
-                .filter(winningNumber -> !winningNumber.equals(""))
-                .filter(winningNumber -> card.getDrawnNumbers().asStream()
-                        .anyMatch(drawnNumber -> drawnNumber.equals(winningNumber)))
-                .count();
+        cards.forEach(card -> {
+            int matches = card.matches();
+            for (int i = 0; i < matches; i++) {
+                int targetCardId = card.idAsInt() + i + 1;
+                map.put(targetCardId, map.get(targetCardId) + map.get(card.idAsInt()));
+            }
+        });
+        return map.values().stream().mapToInt(v -> v).sum();
     }
-
 }
