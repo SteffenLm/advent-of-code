@@ -48,6 +48,6 @@ public class Day05Test {
     var result = Day05.part2(input);
 
     // then
-    assertEquals(-1, result);
+    assertEquals(104070862, result);
   }
 }

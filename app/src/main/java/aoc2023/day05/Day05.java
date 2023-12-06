@@ -7,35 +7,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * My solution for day 5 of Advent of Code 2023. The puzzle can be found at the <a
- * href="https://adventofcode.com/2023/day/5">AoC page</a>.
+ * My solution for day 5 of Advent of Code 2023. The puzzle can be found at the
+ * <a href="https://adventofcode.com/2023/day/5">AoC page</a>.
  */
 public class Day05 {
 
   private record SeedLine(List<Long> seeds) {
     public static SeedLine from(List<String> input) {
-      var seeds =
-          input.stream()
-              .limit(1)
-              .flatMap(
-                  firstLine -> Arrays.stream(firstLine.split(":")).skip(1).map(line -> line.trim()))
-              .flatMap(
-                  seedsLine -> {
-                    var dbgRes = Arrays.stream(seedsLine.split("\\s+"));
-                    return dbgRes;
-                  })
-              .map(
-                  seed -> {
-                    var dbgRes = Long.valueOf(seed);
-                    return dbgRes;
-                  });
-      return new SeedLine(seeds.toList());
+      var seeds = input.stream().limit(1)
+          .flatMap(firstLine -> Arrays.stream(firstLine.split(":")).skip(1).map(String::trim))
+          .flatMap(seedsLine -> Arrays.stream(seedsLine.split("\\s+"))).map(Long::valueOf).toList();
+      return new SeedLine(seeds);
     }
   }
 
   private record CategoryRange(long destinationStart, long sourceStart, long rangeLength) {
     public Optional<Long> getDestination(long source) {
-      if (source >= sourceStart() && source <= sourceStart() + rangeLength()) {
+      if (source >= sourceStart() && source < sourceStart() + rangeLength()) {
         return Optional.of(source - sourceStart() + destinationStart());
       } else {
         return Optional.empty();
@@ -99,72 +87,42 @@ public class Day05 {
 
     public long getLocation(long seed) {
       var map = categories().get("seed");
-      boolean finished = false;
-      long nextValue = seed;
-      while (!finished) {
-        nextValue = map.getMappedValue(nextValue);
-        if (categories().containsKey(map.destination())) {
-          map = categories().get(map.destination());
-        } else {
-          finished = true;
-        }
+      while (map != null) {
+        seed = map.getMappedValue(seed);
+        map = categories().get(map.destination());
       }
-      return nextValue;
+      return seed;
     }
   }
 
   public static long part1(List<String> input) {
     var seedLine = SeedLine.from(input);
     var categoryLine = CategoryLines.from(input);
-    var locations =
-        seedLine.seeds().stream()
-            .map(seed -> categoryLine.getLocation(seed))
-            .mapToLong(value -> value)
-            .min()
-            .getAsLong();
-    return locations;
+    return seedLine.seeds().stream().map(seed -> categoryLine.getLocation(seed))
+        .mapToLong(value -> value).min().getAsLong();
   }
 
   public static long part2(List<String> input) {
     var categoryLine = CategoryLines.from(input);
     var seedRanges = new ArrayList<Range>();
-    var seedLine = SeedLine.from(input);
-    var seedLocationMap = new HashMap<Long, Long>();
-    for (int i = 0; i < seedLine.seeds().size(); i++) {
+    var seeds = SeedLine.from(input).seeds();
+    for (int i = 0; i < seeds.size(); i++) {
       if (i % 2 == 0) {
-        seedRanges.add(new Range(seedLine.seeds().get(i), seedLine.seeds().get(i + 1)));
+        seedRanges.add(new Range(seeds.get(i), seeds.get(i + 1)));
       }
     }
-    var a =
-        seedRanges.stream()
-            .map(
-                range -> {
-                  long location;
-                  if (seedLocationMap.containsKey(range.start())) {
-                    location = seedLocationMap.get(range.start());
-                  } else {
-                    location = categoryLine.getLocation(range.start());
-                    seedLocationMap.put(range.start(), location);
-                  }
-                  for (long seed = range.start() + 1; seed < range.start() + range.end(); seed++) {
-                    long locationOfCurrentSeed;
-                    if (seedLocationMap.containsKey(seed)) {
-                      locationOfCurrentSeed = seedLocationMap.get(seed);
-                    } else {
-                      locationOfCurrentSeed = categoryLine.getLocation(seed);
-                      seedLocationMap.put(seed, location);
-                    }
-                    if (locationOfCurrentSeed < location) {
-                      location = locationOfCurrentSeed;
-                    }
-                  }
-                  return location;
-                })
-            .mapToLong(value -> value)
-            .min()
-            .getAsLong();
-    return a;
+    return seedRanges.stream().map(range -> {
+      long location = categoryLine.getLocation(range.start());
+      for (long seed = range.start() + 1; seed < range.start() + range.end(); seed++) {
+        long locationOfCurrentSeed = categoryLine.getLocation(seed);
+        if (locationOfCurrentSeed < location) {
+          location = locationOfCurrentSeed;
+        }
+      }
+      return location;
+    }).mapToLong(value -> value).min().getAsLong();
   }
 
-  private record Range(long start, long end) {}
+  private record Range(long start, long end) {
+  }
 }
