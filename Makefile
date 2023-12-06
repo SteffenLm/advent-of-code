@@ -42,7 +42,7 @@ endif
 endif
 
 	@# open files in IntelliJ
-	@code app/input/aoc${YEAR}/day${DAY_WITH_PADDING}_example.txt app/src/test/java/aoc${YEAR}/Day${DAY_WITH_PADDING}Test.java app/input/aoc${YEAR}/day${DAY_WITH_PADDING}.txt app/src/main/java/aoc${YEAR}/day${DAY_WITH_PADDING}/Day${DAY_WITH_PADDING}.java > /dev/null
+	@code app/src/test/java/aoc${YEAR}/day${DAY_WITH_PADDING}_example.txt app/src/test/java/aoc${YEAR}/Day${DAY_WITH_PADDING}Test.java app/src/test/java/aoc${YEAR}/day${DAY_WITH_PADDING}.txt app/src/main/java/aoc${YEAR}/day${DAY_WITH_PADDING}/Day${DAY_WITH_PADDING}.java > /dev/null
 
 	@# finish by printing url to puzzle
 	@echo "Files created for puzzle https://adventofcode.com/${YEAR}/day/${DAY}"
