@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 /**
- * My solution for day 11 of Advent of Code 2023. The puzzle can be found at the
- * <a
+ * My solution for day 11 of Advent of Code 2023. The puzzle can be found at the <a
  * href="https://adventofcode.com/2023/day/11">AoC page</a>.
  */
 public class Day11 {
@@ -29,8 +28,11 @@ public class Day11 {
   }
 
   public static int part1(List<String> input) {
-    var grid = new ArrayList<ArrayList<String>>(
-        input.stream().map(line -> new ArrayList<String>(Arrays.stream(line.split("")).toList())).toList());
+    var grid =
+        new ArrayList<ArrayList<String>>(
+            input.stream()
+                .map(line -> new ArrayList<String>(Arrays.stream(line.split("")).toList()))
+                .toList());
     for (int y = 0; y < grid.size(); y++) {
       var line = grid.get(y);
       if (line.stream().noneMatch(s -> s.equals("#"))) {
@@ -70,17 +72,24 @@ public class Day11 {
   }
 
   public static long part2(List<String> input) {
-    var grid = input.stream().map(
-        line -> Arrays.stream(line.split("")).toList()).toList();
+    var grid = input.stream().map(line -> Arrays.stream(line.split("")).toList()).toList();
 
     var multiplier = 1000000;
     var galaxies = getGalaxies(grid);
 
     var xGalaxies = galaxies.stream().map(g -> g.x).collect(Collectors.toSet());
-    var emptyRows = LongStream.rangeClosed(0, grid.size() - 1).filter(y -> !xGalaxies.contains(y)).boxed().toList();
+    var emptyRows =
+        LongStream.rangeClosed(0, grid.size() - 1)
+            .filter(y -> !xGalaxies.contains(y))
+            .boxed()
+            .toList();
 
     var yGalaxies = galaxies.stream().map(g -> g.y).collect(Collectors.toSet());
-    var emptyColumns = LongStream.rangeClosed(0, grid.size() - 1).filter(y -> !yGalaxies.contains(y)).boxed().toList();
+    var emptyColumns =
+        LongStream.rangeClosed(0, grid.size() - 1)
+            .filter(y -> !yGalaxies.contains(y))
+            .boxed()
+            .toList();
 
     var correctGalaxies = getCorrectGalaxyPositons(multiplier, galaxies, emptyRows, emptyColumns);
 
@@ -97,15 +106,20 @@ public class Day11 {
     return sum;
   }
 
-  private static List<Point> getCorrectGalaxyPositons(int multiplier, List<Point> galaxies, List<Long> emptyRows,
-      List<Long> emptyColumns) {
-    return galaxies.stream().map(galaxy -> {
-      var additionalRows = emptyRows.stream().filter(emptyColumn -> galaxy.x() > emptyColumn).count();
-      var additionalColumns = emptyColumns.stream().filter(emptyLine -> galaxy.y() > emptyLine).count();
-      var newX = additionalRows * (multiplier - 1);
-      var newY = additionalColumns * (multiplier - 1);
-      return galaxy.add(new Point(newX, newY));
-    }).toList();
+  private static List<Point> getCorrectGalaxyPositons(
+      int multiplier, List<Point> galaxies, List<Long> emptyRows, List<Long> emptyColumns) {
+    return galaxies.stream()
+        .map(
+            galaxy -> {
+              var additionalRows =
+                  emptyRows.stream().filter(emptyColumn -> galaxy.x() > emptyColumn).count();
+              var additionalColumns =
+                  emptyColumns.stream().filter(emptyLine -> galaxy.y() > emptyLine).count();
+              var newX = additionalRows * (multiplier - 1);
+              var newY = additionalColumns * (multiplier - 1);
+              return galaxy.add(new Point(newX, newY));
+            })
+        .toList();
   }
 
   private static List<Point> getGalaxies(List<List<String>> grid) {
